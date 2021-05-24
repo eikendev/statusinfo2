@@ -1,0 +1,16 @@
+[package]
+name = "statusinfo2"
+version = "0.0.1"
+authors = ["eikendev"]
+edition = "2018"
+description = "A tool to print various metrics of your system."
+homepage = "https://github.com/eikendev/statusinfo2"
+repository = "https://github.com/eikendev/statusinfo2.git"
+readme = "README.md"
+license = "ISC"
+
+[dependencies]
+argh = "0.1.4"
+directories = "3.0.2"
+glob = "0.3.0"
+regex = "1.5.4"

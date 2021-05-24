@@ -155,8 +155,5 @@ fn run_temperature() -> Option<String> {
         })
         .max();
 
-    match temperature {
-        Some(t) => Some(format!("{:02}°", t)),
-        _ => None,
-    }
+    temperature.map(|t| format!("{:02}°", t))
 }

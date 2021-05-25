@@ -113,7 +113,7 @@ fn run_git() -> Option<String> {
 
 fn run_thunderbird() -> Option<String> {
     if let Some(base_dirs) = BaseDirs::new() {
-        let sync_dir = base_dirs.data_dir().join("thunderbird-unread").join("all.count");
+        let sync_dir = base_dirs.data_dir().join("tbunread").join("count");
         let contents = unwrap_or_return!(fs::read_to_string(sync_dir));
 
         return Some(contents);

@@ -24,6 +24,8 @@ fn validate_gadget(gadget: &str) -> Result<gadget::Gadget, String> {
 }
 
 fn main() {
+    human_panic::setup_panic!();
+
     let args: Args = argh::from_env();
 
     let mut results: Vec<String> = vec![];

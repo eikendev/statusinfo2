@@ -2,20 +2,21 @@ use std::convert::TryFrom;
 use std::fs;
 use std::path::Path;
 
+use anyhow::{bail, Context, Result};
 use directories::BaseDirs;
 use regex::Regex;
 
 #[derive(Debug)]
 pub struct GadgetResult {
     pub icon: String,
-    pub data: Option<String>,
+    pub data: Result<String>,
 }
 
 impl GadgetResult {
     pub fn print(&self, space_size: usize, placeholder: &str) -> String {
         let space = str::repeat(" ", space_size);
         let realdata = match &self.data {
-            Some(d) => d.trim_start().trim_end(),
+            Ok(d) => d.trim_start().trim_end(),
             _ => placeholder,
         };
         format!("{}{}{}", self.icon, space, realdata)
@@ -73,87 +74,89 @@ impl TryFrom<&str> for Gadget {
     }
 }
 
-// https://stackoverflow.com/a/51345372
-macro_rules! unwrap_or_return {
-    ( $e:expr ) => {
-        match $e {
-            Ok(x) => x,
-            Err(_) => return None,
-        }
-    };
-}
-
-fn run_synchronization() -> Option<String> {
+fn run_synchronization() -> Result<String> {
     if let Some(base_dirs) = BaseDirs::new() {
         let sync_dir = base_dirs.data_dir().join("sync-*.lock").display().to_string();
-        let count = unwrap_or_return!(glob::glob(&sync_dir)).filter(|p| p.is_ok()).count();
+        let glob_iter = glob::glob(&sync_dir).context("Unable to iterate data directory")?;
+        let count = glob_iter.filter(|p| p.is_ok()).count();
 
-        return Some(count.to_string());
+        return Ok(count.to_string());
     }
 
-    None
+    bail!("Unable to get data directory");
 }
 
-fn run_git() -> Option<String> {
+fn run_git() -> Result<String> {
     if let Some(base_dirs) = BaseDirs::new() {
         let sync_dir = base_dirs.home_dir().join("git").join(".statistics");
-        let contents = unwrap_or_return!(fs::read_to_string(sync_dir));
+        let contents = fs::read_to_string(sync_dir).context("Unable to read statistics file of Git repositories")?;
 
         let split = contents.split(',').collect::<Vec<&str>>();
 
         if split.len() != 3 {
-            return None;
+            bail!("Statistics file of Git repositories is malformed");
         }
 
-        return Some(split.join(" "));
+        return Ok(split.join(" "));
     }
 
-    None
+    bail!("Unable to get data directory");
 }
 
-fn run_thunderbird() -> Option<String> {
+fn run_thunderbird() -> Result<String> {
     if let Some(base_dirs) = BaseDirs::new() {
         let sync_dir = base_dirs.data_dir().join("tbunread").join("count");
-        let contents = unwrap_or_return!(fs::read_to_string(sync_dir));
+        let contents = fs::read_to_string(sync_dir).context("Unable to read count file of tbunread")?;
 
-        return Some(contents);
+        return Ok(contents);
     }
 
-    None
+    bail!("Unable to get data directory");
 }
 
-fn run_memory() -> Option<String> {
+fn run_memory() -> Result<String> {
     let path = Path::new("/proc/meminfo").display().to_string();
-    let contents = unwrap_or_return!(fs::read_to_string(path));
+    let contents = fs::read_to_string(path).context("Unable to read meminfo file")?;
 
     let re = Regex::new(r"^MemTotal: \s+(\d+) kB").unwrap();
     let cap = re.captures(&contents).unwrap();
-    let total: f64 = unwrap_or_return!(cap[1].parse());
+    let total: f64 = cap[1].parse().context("meminfo file is malformed")?;
 
     let re = Regex::new(r"MemAvailable: \s+(\d+) kB").unwrap();
     let cap = re.captures(&contents).unwrap();
-    let available: f64 = unwrap_or_return!(cap[1].parse());
+    let available: f64 = cap[1].parse().context("meminfo file is malformed")?;
 
     let percent = (available / total) * 100.;
     let percent = 100 - percent as usize;
 
-    Some(format!("{:02}%", percent))
+    Ok(format!("{:02}%", percent))
 }
 
-fn run_temperature() -> Option<String> {
+fn run_temperature() -> Result<String> {
     let path = Path::new("/sys/devices/platform/coretemp.0/hwmon");
     let path = path.join("*").join("temp*_input").display().to_string();
-    let temperature = unwrap_or_return!(glob::glob(&path))
-        .map(|file| match file {
-            Ok(p) => {
-                let contents = fs::read_to_string(p).expect("could not read file");
-                let contents = contents.trim_start().trim_end();
-                let contents: i32 = contents.parse().expect("temperature is not a number");
-                contents / 1000
-            }
-            Err(_) => std::i32::MIN,
-        })
-        .max();
+    let glob_iter = glob::glob(&path).context("Unable to iterate coretemp files")?;
 
-    temperature.map(|t| format!("{:02}°", t))
+    let mut temperatures = vec![];
+
+    for file in glob_iter {
+        match file {
+            Ok(p) => {
+                let contents = fs::read_to_string(p).context("Unable to read coretemp file")?;
+                let contents = contents.trim_start().trim_end();
+                let contents: i32 = contents
+                    .parse()
+                    .context("Unable to parse temperature in coretemp file")?;
+                temperatures.push(contents / 1000)
+            }
+            Err(_) => bail!("Unable to open coretemp file"),
+        }
+    }
+
+    let max_temperature = temperatures
+        .into_iter()
+        .max()
+        .context("Unable to locate coretemp files")?;
+
+    Ok(format!("{:02}°", max_temperature))
 }

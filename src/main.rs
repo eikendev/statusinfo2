@@ -6,7 +6,11 @@ use std::convert::TryFrom;
 mod gadget;
 
 #[derive(FromArgs)]
-/// Prints various metrics of your system.
+/**
+Prints various metrics of your system. The metrics are specified as "gadgets".
+
+Available gadgets are: synchronization, git, thunderbird, memory, temperature
+*/
 struct Args {
     /// how many spaces between gadgets
     #[argh(option, default = "4")]
@@ -21,7 +25,7 @@ struct Args {
     gadget: gadget::Gadget,
 
     #[argh(positional, from_str_fn(validate_gadget))]
-    /// the metrics to print
+    /// additional metrics to print
     gadgets: Vec<gadget::Gadget>,
 }
 

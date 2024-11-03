@@ -133,30 +133,39 @@ fn run_memory() -> Result<String> {
 }
 
 fn run_temperature() -> Result<String> {
-    let path = Path::new("/sys/devices/platform/coretemp.0/hwmon");
-    let path = path.join("*").join("temp*_input").display().to_string();
-    let glob_iter = glob::glob(&path).context("Unable to iterate coretemp files")?;
+    let glob_pattern = "/sys/class/hwmon/hwmon*/temp*_input";
+    let glob_iter = glob::glob(glob_pattern).context("Unable to iterate hwmon files")?;
 
     let mut temperatures = vec![];
 
     for file in glob_iter {
         match file {
-            Ok(p) => {
-                let contents = fs::read_to_string(p).context("Unable to read coretemp file")?;
-                let contents = contents.trim_start().trim_end();
-                let contents: i32 = contents
+            Ok(path) => {
+                let contents =
+                    fs::read_to_string(&path).with_context(|| format!("Failed to read file: {}", path.display()))?;
+
+                let temp: i32 = contents
+                    .trim()
                     .parse()
-                    .context("Unable to parse temperature in coretemp file")?;
-                temperatures.push(contents / 1000)
+                    .with_context(|| format!("Failed to parse temperature in file: {}", path.display()))?;
+
+                let temp_in_celsius = temp / 1000;
+
+                if (10..=150).contains(&temp_in_celsius) {
+                    temperatures.push(temp_in_celsius);
+                }
             }
-            Err(_) => bail!("Unable to open coretemp file"),
+            Err(e) => {
+                eprintln!("Error accessing file: {:?}", e);
+            }
         }
     }
 
-    let max_temperature = temperatures
-        .into_iter()
-        .max()
-        .context("Unable to locate coretemp files")?;
+    if temperatures.is_empty() {
+        bail!("No valid temperatures found");
+    }
+
+    let max_temperature = temperatures.into_iter().max().unwrap();
 
     Ok(format!("{:02}°", max_temperature))
 }

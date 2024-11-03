@@ -2,7 +2,7 @@
 name = "statusinfo2"
 version = "0.0.5"
 authors = ["eikendev"]
-edition = "2018"
+edition = "2021"
 description = "A tool to print various metrics of your system."
 homepage = "https://github.com/eikendev/statusinfo2"
 repository = "https://github.com/eikendev/statusinfo2.git"

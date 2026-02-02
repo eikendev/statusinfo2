@@ -13,6 +13,18 @@
 	<a href="https://crates.io/crates/statusinfo2"><img alt="Downloads" src="https://img.shields.io/crates/d/statusinfo2"/></a>&nbsp;
 </p>
 
+## ✨&nbsp;Why statusinfo2?
+
+statusinfo2 is a tiny CLI that prints the exact metrics you care about in one line, making it perfect for status bars, panels, and scripts. It focuses on fast, low-overhead reads from the system instead of heavy daemons or complex config files.
+
+Use it when you want a lightweight way to surface real-time desktop health with a consistent, icon-first output.
+
+## 🧠&nbsp;How it works
+
+- You pass one or more "gadgets" (metrics) as positional arguments
+- Each gadget reads a small, local source (like `/proc/meminfo` or `hwmon` files)
+- Results are formatted with an icon and joined into a single line
+
 ## 🚀&nbsp;Installation
 
 ```bash
@@ -21,9 +33,25 @@ cargo install statusinfo2
 
 ## 📄&nbsp;Usage
 
-This tool powers my status bar and is used to gather system information like total memory usage and CPU temperature.
-Invoke it simply by passing the metrics you want to see as arguments:
+Pass the gadgets you want to print as positional arguments:
+
+```bash
+statusinfo2 memory temperature
 ```
-$ statusinfo2 memory temperature
-  42%      48°
+
+### Gadgets
+
+- `thunderbird`: reads unread count from `~/.local/share/tbunread/count`
+- `memory`: used memory percentage (from `/proc/meminfo`)
+- `temperature`: max CPU temperature (from `/sys/class/hwmon/hwmon*/temp*_input`)
+
+### Options
+
+- `--separator <n>`: spaces between gadgets (default: `4`)
+- `--space <n>`: spaces between icon and data (default: `2`)
+
+Example with tighter spacing:
+
+```bash
+statusinfo2 --separator 2 --space 1 memory temperature
 ```

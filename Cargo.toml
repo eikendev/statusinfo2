@@ -1,6 +1,6 @@
 [package]
 name = "statusinfo2"
-version = "0.0.7"
+version = "0.0.8"
 authors = ["eikendev"]
 edition = "2024"
 description = "A tool to print various metrics of your system."

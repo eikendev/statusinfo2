@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.8](https://github.com/eikendev/statusinfo2/compare/v0.0.7...v0.0.8) (2026-09-20)
+
+
+### Build
+
+* add glibc linux targets, document binstall ([5b3011a](https://github.com/eikendev/statusinfo2/commit/5b3011a60394f0c51d7a78200ec55bcefe1ffa72))
+* migrate to rust edition 2024 ([9f40098](https://github.com/eikendev/statusinfo2/commit/9f40098bdf3659fe41529ee668b0fbbe180335de))
+
 ## [0.0.7](https://github.com/eikendev/statusinfo2/compare/v0.0.6...v0.0.7) (2026-09-19)
 
 

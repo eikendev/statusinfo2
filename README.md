@@ -27,8 +27,22 @@ Use it when you want a lightweight way to surface real-time desktop health with 
 
 ## 🚀&nbsp;Installation
 
+Install a prebuilt binary with [cargo-binstall](https://github.com/cargo-bins/cargo-binstall):
+
+```bash
+cargo binstall statusinfo2
+```
+
+Or build from source:
+
 ```bash
 cargo install statusinfo2
+```
+
+Linux binaries for `x86_64` and `aarch64`, both glibc and static musl, are attached to every [release](https://github.com/eikendev/statusinfo2/releases), each with a `.sha256` checksum and a verifiable build provenance:
+
+```bash
+gh attestation verify statusinfo2-x86_64-unknown-linux-musl.tar.gz --repo eikendev/statusinfo2
 ```
 
 ## 📄&nbsp;Usage

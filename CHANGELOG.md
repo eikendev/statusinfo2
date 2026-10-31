@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.9](https://github.com/eikendev/statusinfo2/compare/v0.0.8...v0.0.9) (2026-10-31)
+
+
+### Build
+
+* **actions:** bump zizmorcore/zizmor-action ([#7](https://github.com/eikendev/statusinfo2/issues/7)) ([f2b409f](https://github.com/eikendev/statusinfo2/commit/f2b409f618275d4ff23975ed9cf4b1d134ba8f78))
+* **actions:** bump zizmorcore/zizmor-action ([#9](https://github.com/eikendev/statusinfo2/issues/9)) ([815342f](https://github.com/eikendev/statusinfo2/commit/815342f68ed45f2cdbb39e98f12b7c8aba910da6))
+
 ## [0.0.8](https://github.com/eikendev/statusinfo2/compare/v0.0.7...v0.0.8) (2026-09-20)
 
 
